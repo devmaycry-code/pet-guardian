@@ -86,7 +86,7 @@ Main features:
 ## 3.1 Registration and Authentication
 
 - FR-01: User registration  
-- FR-02: Secure login (JWT)  
+- FR-02: Secure login (JWT / OAuth)  
 - FR-03: Access profiles  
 
 ## 3.2 Pet Management

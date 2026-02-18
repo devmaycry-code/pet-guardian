@@ -85,7 +85,7 @@ relatórios - Gamificação (Pet Life Score)
 ## 3.1 Cadastro e Autenticação
 
 -   RF-01: Cadastro de usuários
--   RF-02: Login seguro (JWT)
+-   RF-02: Login seguro (JWT / OAuth)
 -   RF-03: Perfis de acesso
 
 ## 3.2 Gestão de Pets
