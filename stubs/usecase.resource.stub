@@ -1,0 +1,45 @@
+<?php
+
+namespace {{ namespace }};
+
+use App\Models\{{ entity }};
+use Illuminate\Support\Facades\DB;
+
+class {{ class }}
+{
+    public function __construct(
+        //
+    ) {}
+
+    public function listar{{ plural }}(): array
+    {
+        return {{ entity }}::all()->toArray();
+    }
+
+    public function criar{{ entity }}(array $dados): {{ entity }}
+    {
+        return DB::transaction(function () use ($dados) {
+            return {{ entity }}::create($dados);
+        });
+    }
+
+    public function obter{{ entity }}(int $id): ?{{ entity }}
+    {
+        return {{ entity }}::find($id);
+    }
+
+    public function atualizar{{ entity }}({{ entity }} ${{ entity }}, array $dados): {{ entity }}
+    {
+        return DB::transaction(function () use (${{ entity }}, $dados) {
+            ${{ entity }}->update($dados);
+            return ${{ entity }};
+        });
+    }
+
+    public function deletar{{ entity }}({{ entity }} ${{ entity }}): void
+    {
+        DB::transaction(function () use (${{ entity }}) {
+            ${{ entity }}->delete();
+        });
+    }
+}

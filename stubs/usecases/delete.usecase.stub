@@ -1,0 +1,15 @@
+<?php
+
+namespace {{ namespace }};
+
+use Illuminate\Support\Facades\DB;
+
+class {{ class }}
+{
+    public function execute(array $data): void
+    {
+        {{ transaction }}
+        //
+        {{ endtransaction }}
+    }
+}
