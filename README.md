@@ -20,8 +20,8 @@ This repository contains the **Laravel backend (API)** of the PetGuardian projec
 
 ### 1️⃣ Clone the project
 ```bash
-git clone https://github.com/your-org/petguardian-api.git
-cd petguardian-api
+git https://github.com/devmaycry-code/pet-guardian.git
+cd pet-guardian
 ````
 
 ### 2️⃣ Install dependencies
