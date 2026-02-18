@@ -182,7 +182,7 @@ PetScoreSnapshot
 # 6. Restrições
 
 -   Backend: Laravel
--   Frontend: Balde
+-   Frontend: Blade
 -   Banco: MySQL
 -   Armazenamento: Local / S3 compatível
 
