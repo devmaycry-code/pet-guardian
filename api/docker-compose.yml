@@ -1,0 +1,72 @@
+name: pet-guardian
+
+services:
+  app:
+    image: petguardian-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pet-guardian-api
+    working_dir: /var/www/html
+    command: php-fpm
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - postgres
+      - redis
+
+  nginx:
+    image: petguardian-server
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    container_name: pet-guardian-server
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+
+  horizon:
+    image: petguardian-worker
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pet-guardian-worker
+    working_dir: /var/www/html
+    command: php artisan horizon
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - app
+      - redis
+      - postgres
+
+  postgres:
+    image: petguardian-database
+    build:
+      context: .
+      dockerfile: docker/postgres/Dockerfile
+    container_name: pet-guardian-database
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: pet_guardian
+      POSTGRES_USER: pet_guardian
+      POSTGRES_PASSWORD: pet_guardian
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: petguardian-cache
+    build:
+      context: .
+      dockerfile: docker/redis/Dockerfile
+    container_name: pet-guardian-cache
+    ports:
+      - "6380:6379"
+
+volumes:
+  postgres_data:

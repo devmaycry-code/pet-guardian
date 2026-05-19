@@ -1,127 +1,160 @@
-````markdown
-# 🐾 PetGuardian API
+# PetGuardian
 
-PetGuardian is an open-source platform to manage **pet adoption, sponsorship, and pet health records**.
+PetGuardian e uma plataforma open source para ajudar animais de rua, ONGs, protetores e lares temporarios por meio de acompanhamento publico, transparencia e apadrinhamento virtual.
 
-This repository contains the **Laravel backend (API)** of the PetGuardian project.
+O objetivo do sistema e permitir que uma pessoa acompanhe a jornada de um pet, siga atualizacoes como em uma rede social de cuidado e, quando quiser, transforme esse vinculo em apoio direto como Pawdrinho.
 
----
+## Estrutura
 
-## 🚀 Requirements
+O projeto esta organizado como monorepo:
 
-- PHP 8.2+
-- Composer
-- Docker (optional, recommended)
-- MySQL
+- `frontend/`: aplicacao React, TypeScript, Vite, Tailwind e dados mockados do MVP.
+- `api/`: API Laravel 12 com PostgreSQL, Redis, Horizon e JWT.
+- `frontend/docs/`: documentacao SDD do frontend.
+- `api/docs/`: documentacao SDD da API.
 
----
+## Estado Atual
 
-## 🧑‍💻 Installation
+Frontend:
 
-### 1️⃣ Clone the project
-```bash
-git https://github.com/devmaycry-code/pet-guardian.git
-cd pet-guardian
-````
+- Home publica.
+- Listagem e perfil completo de pets.
+- Timeline, necessidades, cartinhas, vacinas e transparencia por pet.
+- Fluxo de seguir pets.
+- Feed pessoal de pets seguidos.
+- Login demo com autenticacao real no backend.
+- Dashboard com persistencia local e tentativa de sincronizacao com a API.
+- Paginas publicas de transparencia e denuncias.
+- Apoio recorrente por pet ou ONG com painel de controle e historico.
+- Perfil institucional da ONG com lista dos pets sob cuidado.
 
-### 2️⃣ Install dependencies
+API:
 
-```bash
-composer install
-```
+- Docker com nginx, PHP-FPM, PostgreSQL, Redis e Horizon.
+- JWT com `tymon/jwt-auth` e rota de refresh.
+- CRUD base de pets.
+- Timeline, necessidades, doacoes, sponsorships, organizacoes, denuncias e transparencia.
+- Apoio recorrente por pet ou ONG com cobranças mensais processadas em job.
+- Upload real de imagens de pet com armazenamento e otimização em segundo plano.
+- Migrations, seeders e testes.
+- Swagger UI inicial.
 
-### 3️⃣ Environment setup
+## Resumo De Implementacao
 
-```bash
-cp .env.example .env
-php artisan key:generate
-```
+O detalhamento completo das entregas recentes esta em [IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md).
 
-Edit `.env` and configure your database.
+Em termos práticos, o projeto hoje esta assim:
 
----
+- Frontend e API funcionam em modo API-first nos fluxos principais.
+- O seed/local ficou como fallback e cache.
+- O apoio recorrente passou a suportar pet ou ONG.
+- O perfil da ONG mostra os pets sob sua responsabilidade.
+- O Docker Compose foi padronizado com o projeto `pet-guardian`.
 
-### 4️⃣ Run migrations
-
-```bash
-php artisan migrate --seed
-```
-
----
-
-### 5️⃣ Run the server
-
-```bash
-php artisan serve
-```
-
-API will be available at:
-
-```
-http://127.0.0.1:8000
-```
-
----
-
-## 🐶 Project Goal
-
-PetGuardian aims to provide a free and open platform for:
-
-* Pet registration (NGOs, foster homes, individuals)
-* Virtual sponsorship (padrinhos)
-* Real adoption workflows
-* Pet health records and history
-* Gamified Pet Life Score (PLS)
-
----
-
-## 🧱 Tech Stack
-
-* Laravel 11+
-* MySQL
-* Redis (future)
-* Docker (development)
-
----
-
-## 📂 Basic Structure
-
-```
-Request → Controller → UseCase → Service → Eloquent Model
-```
-
----
-
-## 🧪 Tests
+## Rodando O Frontend
 
 ```bash
-php artisan test
+cd frontend
+npm install
+npm run dev
 ```
 
----
+O Vite abre a aplicacao em uma porta local como:
 
-## 🤝 Contributing
-
-Contributions are welcome!
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Open a Pull Request
-
----
-
-## ⚖️ License
-
-This project is licensed under the **AGPL-3.0 License**.
-
----
-
-## 🐕 About PetGuardian
-
-PetGuardian is an open-source initiative to help animals through technology.
-
-If you like this project, consider giving it a ⭐ on GitHub.
-
+```text
+http://localhost:5173
 ```
+
+## Rodando A API
+
+```bash
+cd api
+docker compose up -d --build
+docker run --rm -v "${PWD}:/var/www/html" -w /var/www/html petguardian-app composer install --prefer-dist --no-interaction --no-progress
+docker compose up -d app horizon
+docker compose exec app php artisan migrate:fresh --seed --force
 ```
+
+API:
+
+```text
+http://localhost:8080
+```
+
+Swagger:
+
+```text
+http://localhost:8080/docs/api
+```
+
+Endpoint de smoke test:
+
+```text
+http://localhost:8080/api/pets
+```
+
+## Containers
+
+- `pet-guardian-server`: nginx.
+- `pet-guardian-api`: Laravel/PHP-FPM.
+- `pet-guardian-worker`: Horizon.
+- `pet-guardian-database`: PostgreSQL.
+- `pet-guardian-cache`: Redis.
+
+## Validacao
+
+Frontend:
+
+```bash
+cd frontend
+npm run build
+npm run lint
+```
+
+API:
+
+```bash
+cd api
+docker compose exec app php artisan test
+docker compose exec app composer audit --format=plain
+docker compose exec app vendor/bin/pint --test
+```
+
+## Conceitos Principais
+
+- `Seguir pet`: acompanhar a jornada do animal sem necessariamente apadrinhar.
+- `Apadrinhar`: apoiar o pet de forma ativa, simbolica ou financeira.
+- `ONG ou lar temporario`: responsavel por cadastrar pets, necessidades e atualizacoes.
+- `Transparencia`: registros publicos de uso de recursos, necessidades e sinais de verificacao.
+- `Denuncia`: canal para sinalizar suspeita de fraude, abuso ou informacao inconsistente.
+
+## Documentacao
+
+Frontend SDD:
+
+- `frontend/docs/product.md`
+- `frontend/docs/personas.md`
+- `frontend/docs/requirements.md`
+- `frontend/docs/user-flows.md`
+- `frontend/docs/ui-guidelines.md`
+- `frontend/docs/domain-model.md`
+- `frontend/docs/tasks.md`
+- `frontend/docs/done.md`
+
+API SDD:
+
+- `api/docs/product.md`
+- `api/docs/architecture.md`
+- `api/docs/requirements.md`
+- `api/docs/domain-model.md`
+- `api/docs/api-contracts.md`
+- `api/docs/antifraud.md`
+- `api/docs/security.md`
+- `api/docs/tasks.md`
+- `api/docs/done.md`
+- `api/docs/openapi.yaml`
+
+## Changelog E Regra De Commit
+
+- O changelog formal deste repositorio fica em [CHANGELOG.md](CHANGELOG.md).
+- Quando o usuario pedir para commitar, atualize o `CHANGELOG.md` antes de fazer o commit.

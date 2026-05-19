@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Manrope', sans-serif;
+  --font-display: 'Fraunces', serif;
+  --color-brand-cream: #fbf4eb;
+  --color-brand-cream-deep: #f1e1cc;
+  --color-brand-panel: #fffaf4;
+  --color-brand-orange: #ea8d4d;
+  --color-brand-orange-soft: #ffe3cf;
+  --color-brand-orange-strong: #b85c22;
+  --color-brand-sage: #5e8f61;
+  --color-brand-sage-soft: #dff0dd;
+  --color-brand-sage-strong: #35623a;
+  --color-brand-sky: #8fc5e8;
+  --color-brand-sky-soft: #ddf1fb;
+  --color-brand-sky-strong: #2d6f93;
+  --color-brand-ink: #2f2a25;
+  --color-brand-muted: #70655b;
+  --color-brand-line: #eadfce;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    font-family: var(--font-sans);
+    background:
+      radial-gradient(circle at top right, rgba(143, 197, 232, 0.16), transparent 24%),
+      radial-gradient(circle at top left, rgba(234, 141, 77, 0.14), transparent 22%),
+      var(--color-brand-cream);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+}

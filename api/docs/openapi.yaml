@@ -1,0 +1,63 @@
+openapi: 3.1.0
+info:
+  title: PetGuardian API
+  version: 0.1.0
+paths:
+  /api/auth/login:
+    post:
+      summary: Login with JWT
+  /api/auth/me:
+    get:
+      summary: Return the current authenticated user
+      security:
+        - bearerAuth: []
+  /api/auth/refresh:
+    post:
+      summary: Refresh JWT within refresh window
+  /api/auth/logout:
+    post:
+      summary: Invalidate the current token
+      security:
+        - bearerAuth: []
+  /api/pets:
+    get:
+      summary: List public pets
+    post:
+      summary: Create a pet
+      security:
+        - bearerAuth: []
+  /api/pets/{slug}:
+    get:
+      summary: Show pet profile
+    put:
+      summary: Update pet
+      security:
+        - bearerAuth: []
+    delete:
+      summary: Delete pet unless memorial
+      security:
+        - bearerAuth: []
+  /api/pets/{slug}/follow:
+    post:
+      summary: Follow a pet
+      security:
+        - bearerAuth: []
+    delete:
+      summary: Unfollow a pet
+      security:
+        - bearerAuth: []
+  /api/organizations:
+    get:
+      summary: List organizations
+  /api/organizations/{slug}:
+    get:
+      summary: Show organization profile
+  /api/transparency:
+    get:
+      summary: List transparency records
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
