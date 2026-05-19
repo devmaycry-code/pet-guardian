@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { EmptyState } from '../components/empty-state';
 import { LetterCard } from '../components/letter-card';
@@ -6,7 +6,6 @@ import { NeedCard } from '../components/need-card';
 import { TimelineCard } from '../components/timeline-card';
 import { TrustBadge } from '../components/trust-badge';
 import { useAuthStore } from '../features/auth/auth-store';
-import { usePetStore } from '../features/pets/pet-store';
 import { followService } from '../services/follow-service';
 import { petsService, type PetProfileData } from '../services/pets-service';
 import { canFollowPets } from '../utils/access';
@@ -16,60 +15,42 @@ import { petStatusLabels } from '../utils/labels';
 export function PetProfilePage() {
   const { slug } = useParams();
   const currentUser = useAuthStore((state) => state.currentUser);
-  const { pets, organizations, needs, timelinePosts, petLetters, transparencyRecords } = usePetStore();
   const [following, setFollowing] = useState(false);
-  const [remoteProfile, setRemoteProfile] = useState<PetProfileData | null>(null);
+  const [profile, setProfile] = useState<PetProfileData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const followedPetIds = currentUser?.followedPetIds ?? [];
-
-  const localData = useMemo(() => {
-    const pet = pets.find((entry) => entry.slug === slug);
-
-    if (!pet) {
-      return null;
-    }
-
-    return {
-      pet,
-      organization: organizations.find((entry) => entry.id === pet.organizationId) ?? null,
-      needs: needs.filter((entry) => entry.petId === pet.id),
-      timeline: timelinePosts.filter((entry) => entry.petId === pet.id),
-      letters: petLetters.filter((entry) => entry.petId === pet.id),
-      transparency: transparencyRecords.filter((entry) => entry.petId === pet.id),
-    };
-  }, [slug, pets, organizations, needs, timelinePosts, petLetters, transparencyRecords]);
 
   useEffect(() => {
     if (!slug) {
       return;
     }
 
-    void Promise.resolve().then(() => setLoading(true));
+    setLoading(true);
+    setError(null);
     let cancelled = false;
 
-    void petsService.profile(slug).then((profile) => {
-      if (!cancelled) {
-        setRemoteProfile(profile);
-        setLoading(false);
-      }
-    }).catch(() => {
-      if (!cancelled) {
-        setLoading(false);
-      }
-    });
+    void petsService
+      .profile(slug)
+      .then((result) => {
+        if (!cancelled) {
+          setProfile(result);
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setError('Nao foi possivel carregar o perfil deste pet.');
+          setLoading(false);
+        }
+      });
 
     return () => {
       cancelled = true;
     };
   }, [slug]);
 
-  const activeRemoteProfile = remoteProfile?.pet.slug === slug ? remoteProfile : null;
-
-  const data =
-    activeRemoteProfile ??
-    localData;
-
-  if (loading && !data) {
+  if (loading) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-16">
         <EmptyState
@@ -80,17 +61,18 @@ export function PetProfilePage() {
     );
   }
 
-  if (!data) {
+  if (error || !profile) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-16">
         <EmptyState
           title="Pet nao encontrado"
-          description="O perfil solicitado nao esta mais disponivel ou ainda nao foi publicado."
+          description={error ?? 'O perfil solicitado nao esta mais disponivel ou ainda nao foi publicado.'}
         />
       </div>
     );
   }
 
+  const data = profile;
   const isFollowing = followedPetIds.includes(data.pet.id);
 
   const handleFollowToggle = async () => {
@@ -149,7 +131,7 @@ export function PetProfilePage() {
               {data.organization ? (
                 <Link
                   className="mt-4 inline-flex rounded-full border border-brand-line bg-white px-4 py-2 text-sm font-semibold text-brand-ink transition hover:bg-brand-cream"
-                  to={`/organizations/${data.organization.id}`}
+                  to={`/organizations/${data.organization.slug}`}
                 >
                   Ver perfil da ONG
                 </Link>
@@ -212,7 +194,7 @@ export function PetProfilePage() {
                 <div className="mt-5">
                   <Link
                     className="block w-full rounded-full bg-brand-orange px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-brand-orange-strong"
-                    to={`/apoios?targetType=pet&targetId=${data.pet.id}`}
+                    to={`/apoios?targetType=pet&targetId=${data.pet.remoteId ?? data.pet.id}`}
                   >
                     Apoiar este pet
                   </Link>

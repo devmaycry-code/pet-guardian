@@ -10,8 +10,9 @@ import { formatCurrency } from '../utils/format';
 export function NgoDashboardPage() {
   const currentUser = useAuthStore((state) => state.currentUser);
   const { organizations, pets, needs, timelinePosts } = usePetStore();
+  const managedOrganizationId = currentUser?.organizationId ?? currentUser?.temporaryHomeId;
 
-  const organization = organizations.find((entry) => entry.id === currentUser?.organizationId);
+  const organization = organizations.find((entry) => entry.id === managedOrganizationId);
   const organizationPets = pets.filter((entry) => entry.organizationId === organization?.id);
   const organizationNeeds = needs.filter((entry) =>
     organizationPets.some((pet) => pet.id === entry.petId),
@@ -117,22 +118,11 @@ export function NgoDashboardPage() {
             {organization.name} em operacao
           </h1>
           <p className="mt-4 max-w-2xl text-lg leading-8 text-brand-muted">
-            Painel para acompanhar pets, publicar atualizacoes e abrir novas necessidades com persistencia local e tentativa de sincronizacao com a API.
+            Painel para acompanhar pets, publicar atualizacoes e abrir novas necessidades usando a API em tempo real.
           </p>
           <p className="mt-3 text-sm text-brand-muted">
             Acesso atual: {roleLabels[currentUser.role]}. Esta area mostra apenas os pets vinculados a {organization.name}.
           </p>
-        </div>
-        <div className="flex flex-wrap gap-3 lg:justify-end">
-          <button
-            className="rounded-full border border-brand-line bg-white px-5 py-3 text-sm font-semibold text-brand-ink transition hover:bg-brand-panel"
-            onClick={() => {
-              void dashboardService.reset();
-            }}
-            type="button"
-          >
-            Restaurar dados iniciais
-          </button>
         </div>
       </section>
 

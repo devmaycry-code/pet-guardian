@@ -66,6 +66,7 @@ const users: User[] = [
 const organizations: Organization[] = [
   {
     id: 'org-patas-vivas',
+    slug: 'ong-patas-vivas',
     name: 'ONG Patas Vivas',
     kind: 'ngo',
     description:
@@ -79,6 +80,7 @@ const organizations: Organization[] = [
   },
   {
     id: 'org-causas-felinas',
+    slug: 'instituto-causas-felinas',
     name: 'Instituto Causas Felinas',
     kind: 'ngo',
     description:
@@ -92,6 +94,7 @@ const organizations: Organization[] = [
   },
   {
     id: 'org-pet-do-bem',
+    slug: 'rede-pet-do-bem',
     name: 'Rede Pet do Bem',
     kind: 'ngo',
     description:
@@ -105,6 +108,7 @@ const organizations: Organization[] = [
   },
   {
     id: 'home-lar-sereno',
+    slug: 'lar-temporario-sereno',
     name: 'Lar Temporario Sereno',
     kind: 'temporary_home',
     description:
@@ -118,6 +122,7 @@ const organizations: Organization[] = [
   },
   {
     id: 'home-casa-mimo',
+    slug: 'casa-mimo',
     name: 'Casa Mimo',
     kind: 'temporary_home',
     description:

@@ -25,7 +25,8 @@ Frontend:
 - Login demo com autenticacao real no backend.
 - Dashboard com persistencia local e tentativa de sincronizacao com a API.
 - Paginas publicas de transparencia e denuncias.
-- Apoio recorrente por pet ou ONG com painel de controle e historico.
+- Apoio recorrente por pet ou ONG com painel de controle, Stripe Checkout e historico.
+- Simulacao local de doacoes com banner explicito e teste de pagamentos em ambiente seguro.
 - Perfil institucional da ONG com lista dos pets sob cuidado.
 
 API:
@@ -34,7 +35,8 @@ API:
 - JWT com `tymon/jwt-auth` e rota de refresh.
 - CRUD base de pets.
 - Timeline, necessidades, doacoes, sponsorships, organizacoes, denuncias e transparencia.
-- Apoio recorrente por pet ou ONG com cobranças mensais processadas em job.
+- Apoio recorrente por pet ou ONG com Stripe Checkout, webhooks e conciliacao local.
+- Simulacao local de doacoes com runtime flag e bloqueio fora de local/dev.
 - Upload real de imagens de pet com armazenamento e otimização em segundo plano.
 - Migrations, seeders e testes.
 - Swagger UI inicial.
@@ -48,6 +50,8 @@ Em termos práticos, o projeto hoje esta assim:
 - Frontend e API funcionam em modo API-first nos fluxos principais.
 - O seed/local ficou como fallback e cache.
 - O apoio recorrente passou a suportar pet ou ONG.
+- O apoio recorrente agora usa Stripe Checkout, webhooks e status de conciliacao.
+- O modo de simulacao local ficou disponivel para doacoes de teste.
 - O perfil da ONG mostra os pets sob sua responsabilidade.
 - O Docker Compose foi padronizado com o projeto `pet-guardian`.
 
@@ -129,6 +133,12 @@ docker compose exec app vendor/bin/pint --test
 - `Denuncia`: canal para sinalizar suspeita de fraude, abuso ou informacao inconsistente.
 
 ## Documentacao
+
+Raiz:
+
+- `CHANGELOG.md`
+- `IMPLEMENTATION_SUMMARY.md`
+- `BACKLOG.md`
 
 Frontend SDD:
 

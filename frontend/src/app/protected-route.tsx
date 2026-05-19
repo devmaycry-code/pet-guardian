@@ -22,7 +22,10 @@ export function ProtectedRoute({
   }
 
   if (allowedRoles?.includes('ngo_manager') || allowedRoles?.includes('temporary_home_manager')) {
-    if (!canAccessNgoDashboard(currentUser) || !currentUser.organizationId) {
+    if (
+      !canAccessNgoDashboard(currentUser) ||
+      (!currentUser.organizationId && !currentUser.temporaryHomeId)
+    ) {
       return <Navigate replace to="/" />;
     }
   }

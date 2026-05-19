@@ -12,9 +12,33 @@ export function PetsPage() {
   const [status, setStatus] = useState<'all' | PetStatus>('all');
   const [urgency, setUrgency] = useState<'all' | NeedPriority>('all');
   const [pets, setPets] = useState<Pet[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    void petsService.list({ query, species, status, urgency }).then(setPets);
+    let cancelled = false;
+
+    setLoading(true);
+    setError(null);
+
+    void petsService
+      .list({ query, species, status, urgency })
+      .then((result) => {
+        if (!cancelled) {
+          setPets(result);
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setError('Nao foi possivel carregar os pets agora.');
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [query, species, status, urgency]);
 
   return (
@@ -38,7 +62,14 @@ export function PetsPage() {
       </section>
 
       <section className="mt-10">
-        {pets.length ? (
+        {loading ? (
+          <EmptyState
+            title="Carregando pets"
+            description="Estamos buscando o catalogo publico na API."
+          />
+        ) : error ? (
+          <EmptyState title="Falha ao carregar" description={error} />
+        ) : pets.length ? (
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {pets.map((pet) => (
               <PetCard key={pet.id} pet={pet} />

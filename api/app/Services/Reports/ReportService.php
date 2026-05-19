@@ -5,6 +5,7 @@ namespace App\Services\Reports;
 use App\Enums\ReportStatus;
 use App\Models\Report;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 
 class ReportService
 {
@@ -14,5 +15,13 @@ class ReportService
             'reporter_user_id' => $user->id,
             'status' => ReportStatus::OPEN->value,
         ]);
+    }
+
+    public function my(User $user): Collection
+    {
+        return Report::query()
+            ->where('reporter_user_id', $user->id)
+            ->latest()
+            ->get();
     }
 }

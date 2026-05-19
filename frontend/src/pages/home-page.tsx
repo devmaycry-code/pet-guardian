@@ -13,7 +13,9 @@ export function HomePage() {
   const needs = usePetStore((state) => state.needs);
   const petLetters = usePetStore((state) => state.petLetters);
 
-  const highlightedPets = pets.filter((pet) => pet.highlight).slice(0, 4);
+  const highlightedPets = [...pets]
+    .sort((a, b) => b.followerCount + b.sponsorCount - (a.followerCount + a.sponsorCount))
+    .slice(0, 4);
   const urgentNeeds = [...needs]
     .sort((a, b) => b.estimatedAmount - a.estimatedAmount)
     .slice(0, 3);
@@ -57,19 +59,24 @@ export function HomePage() {
           <div className="space-y-5">
             <div className="rounded-[1.75rem] bg-white/90 p-5">
               <p className="text-sm text-brand-muted">Necessidade urgente em andamento</p>
-              <h2 className="mt-2 font-display text-3xl text-brand-ink">Luna precisa concluir o tratamento de pele.</h2>
+              <h2 className="mt-2 font-display text-3xl text-brand-ink">
+                {urgentNeeds[0]?.title ?? 'As necessidades reais chegam da API, sem vitrine mockada.'}
+              </h2>
               <p className="mt-3 text-sm leading-6 text-brand-muted">
-                Cada atualizacao publica mostra consultas, compras de remedios e evolucao clinica.
+                {urgentNeeds[0]?.description ??
+                  'A home publica agora depende apenas dos dados sincronizados da API Laravel.'}
               </p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="rounded-[1.75rem] bg-brand-sage-soft p-5">
                 <p className="text-sm text-brand-sage-strong">Pawdrinhos ativos</p>
-                <p className="mt-3 font-display text-4xl text-brand-ink">74</p>
+                <p className="mt-3 font-display text-4xl text-brand-ink">
+                  {pets.reduce((sum, pet) => sum + pet.sponsorCount, 0)}
+                </p>
               </div>
               <div className="rounded-[1.75rem] bg-brand-sky-soft p-5">
                 <p className="text-sm text-brand-sky-strong">ONGs verificadas</p>
-                <p className="mt-3 font-display text-4xl text-brand-ink">3</p>
+                <p className="mt-3 font-display text-4xl text-brand-ink">{verifiedOrganizations.length}</p>
               </div>
             </div>
             <div className="rounded-[1.75rem] border border-white/70 bg-white/80 p-5">
@@ -139,7 +146,7 @@ export function HomePage() {
                 </div>
                 <Link
                   className="mt-4 inline-flex rounded-full bg-white px-4 py-2 text-sm font-semibold text-brand-ink transition hover:bg-brand-orange-soft"
-                  to={`/organizations/${organization.id}`}
+                  to={`/organizations/${organization.slug}`}
                 >
                   Ver perfil institucional
                 </Link>
@@ -154,11 +161,17 @@ export function HomePage() {
             title="Atualizacoes emocionais ligadas a eventos reais."
             description="As cartinhas reforcam o vinculo com o pet, mas sempre nascem de fatos publicados na jornada dele."
           />
-          <div className="grid gap-6 md:grid-cols-2">
-            {petLetters.slice(0, 4).map((letter) => (
-              <LetterCard key={letter.id} letter={letter} />
-            ))}
-          </div>
+          {petLetters.length ? (
+            <div className="grid gap-6 md:grid-cols-2">
+              {petLetters.slice(0, 4).map((letter) => (
+                <LetterCard key={letter.id} letter={letter} />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-[2rem] bg-white p-6 text-sm leading-6 text-brand-muted">
+              Ainda nao ha cartinhas publicadas para os pets listados.
+            </div>
+          )}
         </div>
       </section>
 

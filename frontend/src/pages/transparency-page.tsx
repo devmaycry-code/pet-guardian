@@ -6,17 +6,30 @@ import { transparencyService } from '../services/transparency-service';
 import { formatCurrency, formatDate } from '../utils/format';
 
 export function TransparencyPage() {
-  const { organizations, transparencyRecords, donations } = usePetStore();
-  const [remoteRecords, setRemoteRecords] = useState(transparencyRecords);
+  const { organizations, needs } = usePetStore();
+  const [remoteRecords, setRemoteRecords] = useState<
+    ReturnType<typeof usePetStore.getState>['transparencyRecords']
+  >([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
-    void transparencyService.list().then((records) => {
-      if (!cancelled) {
-        setRemoteRecords(records);
-      }
-    });
+    void transparencyService
+      .list()
+      .then((records) => {
+        if (!cancelled) {
+          setRemoteRecords(records);
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setError('Nao foi possivel carregar os registros de transparencia.');
+          setLoading(false);
+        }
+      });
 
     return () => {
       cancelled = true;
@@ -27,7 +40,7 @@ export function TransparencyPage() {
     ['verified', 'veterinary_verified', 'community_verified'].includes(org.trustLevel),
   ).length;
   const totalTracked = remoteRecords.reduce((sum, record) => sum + record.amountUsed, 0);
-  const totalDonations = donations.reduce((sum, donation) => sum + donation.amount, 0);
+  const totalDonations = needs.reduce((sum, need) => sum + need.collectedAmount, 0);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 md:py-16">
@@ -40,7 +53,8 @@ export function TransparencyPage() {
             Confianca se constroi com rastro, contexto e acesso publico.
           </h1>
           <p className="max-w-2xl text-lg leading-8 text-brand-muted">
-            O MVP expoe verificacao, historico de uso e canal de denuncia para que o cuidado seja verificavel, nao apenas bem intencionado.
+            O MVP expoe verificacao, historico de uso e canal de denuncia para que o cuidado seja
+            verificavel, nao apenas bem intencionado.
           </p>
         </div>
         <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-4">
@@ -62,9 +76,12 @@ export function TransparencyPage() {
               'Selo de confianca no perfil do responsavel e do pet.',
               'Historico publico de necessidades, timeline e prestacao de contas.',
               'Canal de denuncias para pet falso, imagem suspeita e uso indevido.',
-              'Preparacao para prova dinamica e verificacao futura via API Laravel.',
+              'Contratos documentados e integracao direta com a API Laravel.',
             ].map((item) => (
-              <article key={item} className="rounded-[1.5rem] bg-brand-panel p-4 text-sm leading-6 text-brand-muted">
+              <article
+                key={item}
+                className="rounded-[1.5rem] bg-brand-panel p-4 text-sm leading-6 text-brand-muted"
+              >
                 {item}
               </article>
             ))}
@@ -73,20 +90,35 @@ export function TransparencyPage() {
 
         <div className="space-y-4">
           <h2 className="font-display text-3xl text-brand-ink">Registros recentes</h2>
-          {remoteRecords.map((record) => (
-            <article key={record.id} className="rounded-[1.75rem] border border-brand-line bg-white p-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h3 className="font-display text-2xl text-brand-ink">{record.title}</h3>
-                  <p className="text-sm text-brand-muted">{record.description}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-brand-sage-strong">{formatCurrency(record.amountUsed)}</p>
-                  <p className="text-sm text-brand-muted">{formatDate(record.date)}</p>
-                </div>
-              </div>
+          {loading ? (
+            <article className="rounded-[1.75rem] border border-brand-line bg-white p-5 text-sm text-brand-muted">
+              Carregando registros...
             </article>
-          ))}
+          ) : error ? (
+            <article className="rounded-[1.75rem] border border-rose-200 bg-rose-50 p-5 text-sm text-rose-700">
+              {error}
+            </article>
+          ) : (
+            remoteRecords.map((record) => (
+              <article
+                key={record.id}
+                className="rounded-[1.75rem] border border-brand-line bg-white p-5"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h3 className="font-display text-2xl text-brand-ink">{record.title}</h3>
+                    <p className="text-sm text-brand-muted">{record.description}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-brand-sage-strong">
+                      {formatCurrency(record.amountUsed)}
+                    </p>
+                    <p className="text-sm text-brand-muted">{formatDate(record.date)}</p>
+                  </div>
+                </div>
+              </article>
+            ))
+          )}
         </div>
       </section>
 

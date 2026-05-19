@@ -1,5 +1,6 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { EmptyState } from '../components/empty-state';
 import { useAuthStore } from '../features/auth/auth-store';
 import { usePetStore } from '../features/pets/pet-store';
 import { reportsService } from '../services/reports-service';
@@ -26,6 +27,8 @@ export function ReportsPage() {
   const [reason, setReason] = useState<ReportReason>('missing_accountability');
   const [description, setDescription] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(Boolean(currentUser));
+  const [error, setError] = useState<string | null>(null);
 
   const selectedPetName = useMemo(
     () =>
@@ -34,12 +37,39 @@ export function ReportsPage() {
     [petId, pets],
   );
 
+  useEffect(() => {
+    if (!currentUser) {
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    void reportsService
+      .my()
+      .then(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setError('Nao foi possivel carregar suas denuncias.');
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUser]);
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setError(null);
 
     await reportsService.create({
       petId: petId || undefined,
-      reporterName: currentUser?.name ?? 'Visitante identificado',
       reason,
       description,
     });
@@ -47,6 +77,17 @@ export function ReportsPage() {
     setDescription('');
     setSubmitted(true);
   };
+
+  if (!currentUser) {
+    return (
+      <div className="mx-auto max-w-4xl px-4 py-16">
+        <EmptyState
+          title="Entre para denunciar"
+          description="O envio de denuncias agora depende de autenticacao real na API."
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 md:py-16">
@@ -120,9 +161,15 @@ export function ReportsPage() {
             Enviar denuncia
           </button>
 
+          {error ? (
+            <div className="rounded-[1.5rem] bg-rose-50 p-4 text-sm leading-6 text-rose-700">
+              {error}
+            </div>
+          ) : null}
+
           {submitted ? (
             <div className="rounded-[1.5rem] bg-brand-sage-soft p-4 text-sm leading-6 text-brand-sage-strong">
-              Denuncia enviada com sucesso. No MVP, ela entra na fila local ou na API quando ha sessao ativa.
+              Denuncia enviada com sucesso e registrada na API.
             </div>
           ) : null}
         </form>
@@ -131,20 +178,30 @@ export function ReportsPage() {
       <section className="mt-16">
         <h2 className="font-display text-3xl text-brand-ink">Fila recente</h2>
         <div className="mt-6 grid gap-4">
-          {reports.map((report) => (
-            <article key={report.id} className="rounded-[1.75rem] bg-white p-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="font-semibold text-brand-ink">{report.reason}</p>
-                  <p className="text-sm text-brand-muted">{report.reporterName}</p>
-                </div>
-                <span className="rounded-full bg-brand-sky-soft px-3 py-1 text-xs font-semibold text-brand-sky-strong">
-                  {report.status}
-                </span>
-              </div>
-              <p className="mt-3 text-sm leading-6 text-brand-muted">{report.description}</p>
+          {loading ? (
+            <article className="rounded-[1.75rem] bg-white p-5 text-sm text-brand-muted">
+              Carregando denuncias...
             </article>
-          ))}
+          ) : reports.length ? (
+            reports.map((report) => (
+              <article key={report.id} className="rounded-[1.75rem] bg-white p-5">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-brand-ink">{report.reason}</p>
+                    <p className="text-sm text-brand-muted">{report.reporterName}</p>
+                  </div>
+                  <span className="rounded-full bg-brand-sky-soft px-3 py-1 text-xs font-semibold text-brand-sky-strong">
+                    {report.status}
+                  </span>
+                </div>
+                <p className="mt-3 text-sm leading-6 text-brand-muted">{report.description}</p>
+              </article>
+            ))
+          ) : (
+            <article className="rounded-[1.75rem] bg-white p-5 text-sm text-brand-muted">
+              Nenhuma denuncia enviada por esta conta ate agora.
+            </article>
+          )}
         </div>
       </section>
     </div>

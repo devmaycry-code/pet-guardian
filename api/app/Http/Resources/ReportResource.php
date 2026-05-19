@@ -18,6 +18,7 @@ class ReportResource extends JsonResource
             'description' => $this->description,
             'status' => $this->status?->value ?? $this->status,
             'resolved_at' => $this->resolved_at,
+            'created_at' => $this->created_at,
         ];
     }
 }

@@ -14,11 +14,17 @@ class Sponsorship extends Model
         'target_identifier',
         'monthly_amount',
         'status',
+        'gateway',
+        'gateway_status',
+        'checkout_session_id',
+        'stripe_customer_id',
+        'stripe_subscription_id',
         'started_at',
         'next_billing_at',
         'last_billed_at',
         'paused_at',
         'canceled_at',
+        'last_gateway_event_at',
     ];
 
     protected function casts(): array
@@ -26,6 +32,7 @@ class Sponsorship extends Model
         return [
             'monthly_amount' => 'decimal:2',
             'status' => SponsorshipStatus::class,
+            'last_gateway_event_at' => 'datetime',
             'started_at' => 'datetime',
             'next_billing_at' => 'datetime',
             'last_billed_at' => 'datetime',

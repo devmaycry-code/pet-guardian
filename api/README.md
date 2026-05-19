@@ -111,14 +111,18 @@ Relacionados:
 - `GET /api/pets/{slug}/needs`
 - `POST /api/pets/{slug}/needs`
 - `POST /api/donations`
+- `POST /api/donations/simulate`
 - `GET /api/donations/my`
 - `POST /api/sponsorships`
+- `POST /api/sponsorships/checkout`
 - `GET /api/sponsorships/my`
+- `GET /api/runtime`
 - `GET /api/organizations`
 - `GET /api/organizations/{slug}`
 - `POST /api/reports`
 - `GET /api/transparency`
 - `GET /api/pets/{slug}/transparency`
+- `POST /api/webhooks/stripe`
 
 ## Dados Seedados
 
@@ -155,19 +159,23 @@ docker compose exec app vendor/bin/pint --test
 Ultima validacao executada:
 
 ```text
-7 tests passed
+Suite principal validada + StripeGatewayApiTest
 composer audit: no security vulnerability advisories found
 GET http://localhost:8080/api/pets: 200
 ```
 
 ## Resumo De Entregas Recentes
 
-- Apoio recorrente com destino para pet ou ONG.
-- Cobranca mensal simbolica processada por command/job.
+- Apoio recorrente com destino para pet ou ONG, usando Stripe Checkout, webhooks e reconciliacao local.
+- Simulacao local de doacoes com bloqueio por ambiente e aviso exposto para a interface.
 - Campos de apoio e doacao ajustados para suportar ONG sem `pet_id` obrigatorio.
 - Perfil institucional de ONG retornando os pets sob cuidado.
 - Nomes dos containers padronizados para `pet-guardian-*`.
 - Redis exposto no host pela porta `6380` para evitar conflito local.
+
+## Proximos Passos
+
+O backlog vivo do projeto fica em [../BACKLOG.md](../BACKLOG.md).
 
 ## Documentacao SDD
 

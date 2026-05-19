@@ -35,4 +35,16 @@ return [
         ],
     ],
 
+    'stripe' => [
+        'secret' => env('STRIPE_SECRET'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+        'currency' => env('STRIPE_CURRENCY', 'brl'),
+        'checkout_success_url' => env('STRIPE_CHECKOUT_SUCCESS_URL', 'http://localhost:5173/apoios?checkout=success'),
+        'checkout_cancel_url' => env('STRIPE_CHECKOUT_CANCEL_URL', 'http://localhost:5173/apoios?checkout=cancelled'),
+    ],
+
+    'payments' => [
+        'simulation_enabled' => env('PAYMENT_SIMULATION_ENABLED', false),
+    ],
+
 ];

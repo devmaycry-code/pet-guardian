@@ -13,6 +13,7 @@ const navItems = [
 
 export function AppShell() {
   const currentUser = useAuthStore((state) => state.currentUser);
+
   const logout = () => {
     void authService.logout();
   };
@@ -118,7 +119,7 @@ export function AppShell() {
             </p>
           </div>
           <div className="text-sm text-brand-muted">
-            MVP open source API-first com fallback local explicito e integracao com API Laravel.
+            MVP open source API-first com integracao direta ao backend Laravel.
           </div>
         </div>
       </footer>

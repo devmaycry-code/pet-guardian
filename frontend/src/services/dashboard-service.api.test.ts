@@ -70,6 +70,7 @@ describe('dashboardService api integration', () => {
     usePetStore.getState().mergeRemoteOrganizations([
       {
         id: organizationId,
+        slug: 'ong-teste',
         name: 'ONG Teste',
         kind: 'ngo',
         description: 'Organizacao de teste',
@@ -201,6 +202,7 @@ describe('dashboardService api integration', () => {
     usePetStore.getState().mergeRemoteOrganizations([
       {
         id: organizationId,
+        slug: 'ong-teste',
         name: 'ONG Teste',
         kind: 'ngo',
         description: 'Organizacao de teste',

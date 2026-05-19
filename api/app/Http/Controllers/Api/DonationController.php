@@ -21,6 +21,11 @@ class DonationController extends Controller
         return $this->success(new DonationResource($this->donationService->create($request->user('api'), $request->validated())), 201, 'Donation created');
     }
 
+    public function simulate(StoreDonationRequest $request): JsonResponse
+    {
+        return $this->success(new DonationResource($this->donationService->simulate($request->user('api'), $request->validated())), 201, 'Donation simulated');
+    }
+
     public function my(Request $request): JsonResponse
     {
         return $this->success(DonationResource::collection($this->donationService->my($request->user('api'))));

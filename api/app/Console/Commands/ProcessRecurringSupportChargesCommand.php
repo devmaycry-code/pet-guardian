@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 class ProcessRecurringSupportChargesCommand extends Command
 {
     protected $signature = 'support:process-recurring-charges';
-    protected $description = 'Process due recurring support charges and create donation records.';
+    protected $description = 'Reconcile recurring support states with Stripe and refresh local records.';
 
     public function __construct(private readonly SponsorshipService $sponsorshipService)
     {
@@ -19,7 +19,7 @@ class ProcessRecurringSupportChargesCommand extends Command
     {
         $processed = $this->sponsorshipService->processDueCharges();
 
-        $this->info(sprintf('Processed %d recurring support charge(s).', $processed));
+        $this->info(sprintf('Reconciled %d recurring support record(s).', $processed));
 
         return self::SUCCESS;
     }

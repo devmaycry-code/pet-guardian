@@ -22,6 +22,16 @@ class SponsorshipController extends Controller
         return $this->success(new SponsorshipResource($this->sponsorshipService->create($request->user('api'), $request->validated())), 201, 'Sponsorship created');
     }
 
+    public function checkout(StoreSponsorshipRequest $request): JsonResponse
+    {
+        $result = $this->sponsorshipService->createCheckout($request->user('api'), $request->validated());
+
+        return $this->success([
+            'sponsorship' => new SponsorshipResource($result['sponsorship']),
+            'checkout_url' => $result['checkout_url'],
+        ], 201, 'Checkout session created');
+    }
+
     public function my(Request $request): JsonResponse
     {
         return $this->success(SponsorshipResource::collection($this->sponsorshipService->my($request->user('api'))));

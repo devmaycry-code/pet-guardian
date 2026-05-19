@@ -21,6 +21,7 @@ class DonationResource extends JsonResource
             'payment_method' => $this->payment_method,
             'status' => $this->status?->value ?? $this->status,
             'external_id' => $this->external_id,
+            'gateway_event_id' => $this->gateway_event_id,
             'created_at' => $this->created_at,
             'pet' => new PetResource($this->whenLoaded('pet')),
             'organization' => new OrganizationResource($this->whenLoaded('organization')),

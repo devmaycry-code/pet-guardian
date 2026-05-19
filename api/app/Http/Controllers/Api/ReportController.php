@@ -8,12 +8,18 @@ use App\Http\Resources\ReportResource;
 use App\Services\Reports\ReportService;
 use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
     use ApiResponse;
 
     public function __construct(private readonly ReportService $reportService) {}
+
+    public function my(Request $request): JsonResponse
+    {
+        return $this->success(ReportResource::collection($this->reportService->my($request->user('api'))));
+    }
 
     public function store(StoreReportRequest $request): JsonResponse
     {

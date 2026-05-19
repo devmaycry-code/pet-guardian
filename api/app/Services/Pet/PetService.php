@@ -10,7 +10,7 @@ class PetService
     public function list(array $filters = []): LengthAwarePaginator
     {
         return Pet::query()
-            ->with(['organization'])
+            ->with(['organization', 'needs', 'letters'])
             ->withCount(['followers', 'sponsorships'])
             ->when($filters['search'] ?? null, fn ($query, $search) => $query->where('name', 'like', "%{$search}%"))
             ->when($filters['status'] ?? null, fn ($query, $status) => $query->where('status', $status))

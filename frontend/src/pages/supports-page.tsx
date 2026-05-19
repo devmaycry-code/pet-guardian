@@ -84,20 +84,38 @@ export function SupportsPage() {
     return organization ? `${organization.name} - ONG` : `ONG #${support.targetId}`;
   };
 
+  const resolveSupportStatusLabel = (status: SupportView['status']) => {
+    const labels: Record<SupportView['status'], string> = {
+      pending_checkout: 'Aguardando checkout',
+      active: 'Ativo',
+      paused: 'Pausado',
+      payment_failed: 'Falha no pagamento',
+      canceled: 'Cancelado',
+    };
+
+    return labels[status] ?? status;
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitting(true);
 
     try {
-        const payload: SupportCreationPayload = {
-          targetType,
-          targetId: selectedTargetId,
-          monthlyAmount: Number(monthlyAmount),
-          sponsorName: currentUser?.name,
-        };
+      const payload: SupportCreationPayload = {
+        targetType,
+        targetId: selectedTargetId,
+        monthlyAmount: Number(monthlyAmount),
+        sponsorName: currentUser?.name,
+      };
 
       const createdSupport = await sponsorshipService.createSupport(payload);
-      setSupports((state) => [createdSupport, ...state]);
+      setSupports((state) => [createdSupport.support, ...state]);
+
+      if (createdSupport.checkoutUrl) {
+        window.location.assign(createdSupport.checkoutUrl);
+        return;
+      }
+
       setTransactions(await sponsorshipService.myTransactions());
     } finally {
       setSubmitting(false);
@@ -224,7 +242,7 @@ export function SupportsPage() {
                         </h3>
                       </div>
                       <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-brand-ink">
-                        {support.status}
+                        {resolveSupportStatusLabel(support.status)}
                       </span>
                     </div>
                     <div className="mt-4 grid gap-3 text-sm text-brand-muted sm:grid-cols-2">

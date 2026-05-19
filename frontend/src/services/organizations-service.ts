@@ -17,46 +17,24 @@ export interface OrganizationProfileData {
 
 export const organizationsService = {
   async show(identifier: string): Promise<OrganizationProfileData | null> {
-    const localOrganization = usePetStore
-      .getState()
-      .organizations.find((entry) => entry.id === identifier) ?? null;
+    const response = await publicHttp.get<ApiEnvelope<ApiOrganization>>(
+      `/organizations/${identifier}`,
+    );
+    const remoteOrganization = response.data?.result;
 
-    try {
-      const response = await publicHttp.get<ApiEnvelope<ApiOrganization>>(
-        `/organizations/${identifier}`,
-      );
-      const remoteOrganization = response.data?.result;
-
-      if (!remoteOrganization) {
-        if (!localOrganization) {
-          return null;
-        }
-
-        return {
-          organization: localOrganization,
-          pets: usePetStore.getState().pets.filter((pet) => pet.organizationId === localOrganization.id),
-        };
-      }
-
-      const mappedOrganization = mapRemoteOrganization(remoteOrganization);
-      const mappedPets = (remoteOrganization.pets ?? []).map((pet) => mapRemotePetToPet(pet));
-
-      usePetStore.getState().mergeRemoteOrganizations([mappedOrganization]);
-      usePetStore.getState().mergeRemotePets(mappedPets);
-
-      return {
-        organization: mappedOrganization,
-        pets: mappedPets,
-      };
-    } catch {
-      if (!localOrganization) {
-        return null;
-      }
-
-      return {
-        organization: localOrganization,
-        pets: usePetStore.getState().pets.filter((pet) => pet.organizationId === localOrganization.id),
-      };
+    if (!remoteOrganization) {
+      return null;
     }
+
+    const mappedOrganization = mapRemoteOrganization(remoteOrganization);
+    const mappedPets = (remoteOrganization.pets ?? []).map((pet) => mapRemotePetToPet(pet));
+
+    usePetStore.getState().mergeRemoteOrganizations([mappedOrganization]);
+    usePetStore.getState().mergeRemotePets(mappedPets);
+
+    return {
+      organization: mappedOrganization,
+      pets: mappedPets,
+    };
   },
 };

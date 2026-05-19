@@ -13,6 +13,19 @@ vi.mock('./delay', () => ({
   delay: vi.fn(() => Promise.resolve()),
 }));
 
+vi.mock('./http', () => ({
+  http: {
+    post: vi.fn(async () => ({ data: {} })),
+    delete: vi.fn(async () => ({ data: {} })),
+    get: vi.fn(async () => ({ data: {} })),
+  },
+  publicHttp: {
+    post: vi.fn(async () => ({ data: {} })),
+    delete: vi.fn(async () => ({ data: {} })),
+    get: vi.fn(async () => ({ data: {} })),
+  },
+}));
+
 const resetState = () => {
   localStorage.clear();
   useAuthStore.getState().logout();

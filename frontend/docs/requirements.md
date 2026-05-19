@@ -8,6 +8,8 @@
 - Exibir perfil publico da ONG com dados institucionais e lista dos pets que ela cuida.
 - Permitir seguir pets sem apadrinhar, como em uma rede social.
 - Permitir apadrinhamento com persistencia na API e fallback local.
+- Permitir apoio recorrente com Stripe Checkout, webhooks e conciliacao no app.
+- Permitir simular doacoes em ambiente local usando Stripe Test Mode e um banner explicito de simulacao.
 - Permitir login demo com autenticacao real no backend.
 - Exibir pagina pessoal com pets seguidos e feed de atualizacoes.
 - Exibir dashboard de ONG, lar temporario ou tutor responsavel com resumo, pets, cadastro, atualizacoes e necessidades, com sincronizacao opcional com a API.

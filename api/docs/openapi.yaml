@@ -19,6 +19,9 @@ paths:
       summary: Invalidate the current token
       security:
         - bearerAuth: []
+  /api/runtime:
+    get:
+      summary: Expose runtime flags
   /api/pets:
     get:
       summary: List public pets
@@ -37,6 +40,23 @@ paths:
       summary: Delete pet unless memorial
       security:
         - bearerAuth: []
+  /api/pets/{slug}/timeline:
+    get:
+      summary: List timeline posts for a pet
+    post:
+      summary: Create a timeline post for a pet
+      security:
+        - bearerAuth: []
+  /api/pets/{slug}/needs:
+    get:
+      summary: List active needs for a pet
+    post:
+      summary: Create a need for a pet
+      security:
+        - bearerAuth: []
+  /api/pets/{slug}/transparency:
+    get:
+      summary: List transparency records for a pet
   /api/pets/{slug}/follow:
     post:
       summary: Follow a pet
@@ -55,6 +75,64 @@ paths:
   /api/transparency:
     get:
       summary: List transparency records
+  /api/donations:
+    post:
+      summary: Create a donation
+      security:
+        - bearerAuth: []
+  /api/donations/simulate:
+    post:
+      summary: Simulate a paid donation in local/dev
+      security:
+        - bearerAuth: []
+  /api/donations/my:
+    get:
+      summary: List current user donations
+      security:
+        - bearerAuth: []
+  /api/sponsorships:
+    post:
+      summary: Create a legacy local sponsorship
+      security:
+        - bearerAuth: []
+  /api/sponsorships/checkout:
+    post:
+      summary: Create a recurring support checkout session
+      security:
+        - bearerAuth: []
+  /api/sponsorships/my:
+    get:
+      summary: List current user sponsorships
+      security:
+        - bearerAuth: []
+  /api/sponsorships/{sponsorship}/pause:
+    patch:
+      summary: Pause a sponsorship
+      security:
+        - bearerAuth: []
+  /api/sponsorships/{sponsorship}/resume:
+    patch:
+      summary: Resume a sponsorship
+      security:
+        - bearerAuth: []
+  /api/sponsorships/{sponsorship}/cancel:
+    patch:
+      summary: Cancel a sponsorship
+      security:
+        - bearerAuth: []
+  /api/reports:
+    post:
+      summary: Create a report
+      security:
+        - bearerAuth: []
+  /api/reports/my:
+    get:
+      summary: List reports created by the current user
+      security:
+        - bearerAuth: []
+  /api/webhooks/stripe:
+    post:
+      summary: Handle Stripe payment webhooks
 components:
   securitySchemes:
     bearerAuth:

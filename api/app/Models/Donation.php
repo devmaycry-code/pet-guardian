@@ -18,6 +18,7 @@ class Donation extends Model
         'payment_method',
         'status',
         'external_id',
+        'gateway_event_id',
     ];
 
     protected function casts(): array

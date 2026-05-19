@@ -1,4 +1,3 @@
-import { initialAppData } from '../mocks/data';
 import type { User } from '../types/domain';
 import { useAuthStore } from '../features/auth/auth-store';
 import { http, publicHttp } from './http';
@@ -11,75 +10,37 @@ type ApiEnvelope<T> = {
 type ApiAuthPayload = {
   access_token?: string;
   refresh_token?: string | null;
+  user?: ApiUser;
 };
 
 type ApiUser = Parameters<typeof mapApiUserToLocalUser>[0];
 
-const profileCredentials: Record<
-  string,
-  {
-    email: string;
-    password: string;
-  }
-> = {
-  'user-marina': {
-    email: 'user@petguardian.local',
-    password: 'password',
-  },
-  'user-diego': {
-    email: 'ong@petguardian.local',
-    password: 'password',
-  },
-  'user-lais': {
-    email: 'lar@petguardian.local',
-    password: 'password',
-  },
-};
-
 export const authService = {
-  listProfiles(): User[] {
-    return initialAppData.users;
-  },
+  async login(credentials: { email: string; password: string }) {
+    const response = await publicHttp.post<ApiEnvelope<ApiAuthPayload>>('/auth/login', credentials);
+    const payload = response.data?.result;
+    const accessToken = payload?.access_token;
+    const refreshToken = payload?.refresh_token ?? payload?.access_token ?? null;
 
-  login(profileId: string) {
-    const user = initialAppData.users.find((entry) => entry.id === profileId) ?? null;
-    useAuthStore.getState().loginAs(profileId);
-    return user;
-  },
+    useAuthStore.getState().setTokens({
+      accessToken: typeof accessToken === 'string' ? accessToken : null,
+      refreshToken: typeof refreshToken === 'string' ? refreshToken : null,
+    });
 
-  async loginWithSelectedProfile(profileId: string) {
-    const profile = initialAppData.users.find((entry) => entry.id === profileId) ?? null;
-    const credentials = profileCredentials[profileId];
-
-    if (!profile || !credentials) {
-      return this.login(profileId);
+    if (payload?.user) {
+      const hydratedUser = mapApiUserToLocalUser(payload.user, null);
+      useAuthStore.getState().setCurrentUser(hydratedUser);
+      return hydratedUser;
     }
 
-    try {
-      const response = await publicHttp.post<ApiEnvelope<ApiAuthPayload>>('/auth/login', credentials);
-      const payload = response.data?.result;
-      const accessToken = payload?.access_token;
-      const refreshToken = payload?.refresh_token ?? payload?.access_token ?? null;
-
-      if (typeof accessToken === 'string') {
-        useAuthStore.getState().setTokens({
-          accessToken,
-          refreshToken: typeof refreshToken === 'string' ? refreshToken : null,
-        });
-      }
-
-      const hydrated = await this.restoreSession(profile);
-      return hydrated ?? profile;
-    } catch {
-      return this.login(profileId);
-    }
+    return this.restoreSession();
   },
 
-  async restoreSession(fallbackUser?: User | null) {
+  async restoreSession(): Promise<User | null> {
     const { currentUser, accessToken } = useAuthStore.getState();
 
     if (!accessToken) {
-      return currentUser ?? fallbackUser ?? null;
+      return currentUser ?? null;
     }
 
     try {
@@ -87,7 +48,7 @@ export const authService = {
       const apiUser = response.data?.result;
 
       if (apiUser) {
-        const hydratedUser = mapApiUserToLocalUser(apiUser, fallbackUser ?? currentUser);
+        const hydratedUser = mapApiUserToLocalUser(apiUser, currentUser);
         useAuthStore.getState().setCurrentUser(hydratedUser);
         return hydratedUser;
       }
@@ -98,7 +59,7 @@ export const authService = {
         useAuthStore.getState().clearSession();
       }
 
-      return fallbackUser ?? currentUser ?? null;
+      return null;
     }
 
     return currentUser;

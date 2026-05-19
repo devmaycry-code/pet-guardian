@@ -11,7 +11,7 @@ export type OrganizationKind = 'ngo' | 'temporary_home';
 
 export type UserRole = 'pawdrinho' | 'ngo_manager' | 'temporary_home_manager';
 export type SupportTargetType = 'pet' | 'organization';
-export type SupportStatus = 'active' | 'paused' | 'canceled';
+export type SupportStatus = 'pending_checkout' | 'active' | 'paused' | 'payment_failed' | 'canceled';
 
 export type PetStatus =
   | 'available'
@@ -81,6 +81,7 @@ export interface User {
 
 export interface Organization {
   id: string;
+  slug: string;
   name: string;
   kind: OrganizationKind;
   description: string;
@@ -129,7 +130,7 @@ export interface Donation {
   needId?: string;
   donorName: string;
   amount: number;
-  type: 'pix' | 'item' | 'symbolic';
+  type: 'pix' | 'item' | 'symbolic' | 'card';
   status: 'confirmed' | 'pending';
   createdAt: string;
 }
@@ -141,6 +142,11 @@ export interface Sponsorship {
   targetId: string;
   petId?: string;
   organizationId?: string;
+  gateway?: 'stripe' | 'local';
+  gatewayStatus?: string | null;
+  checkoutSessionId?: string | null;
+  stripeCustomerId?: string | null;
+  stripeSubscriptionId?: string | null;
   monthlyAmount: number;
   status: SupportStatus;
   startedAt: string;
@@ -148,6 +154,7 @@ export interface Sponsorship {
   lastBilledAt: string;
   pausedAt?: string | null;
   canceledAt?: string | null;
+  lastGatewayEventAt?: string | null;
 }
 
 export interface SupportTransaction {
@@ -158,7 +165,7 @@ export interface SupportTransaction {
   petId?: string;
   organizationId?: string;
   amount: number;
-  paymentMethod: 'card';
+  paymentMethod: 'card' | 'pix';
   status: 'confirmed' | 'pending';
   createdAt: string;
 }
@@ -179,7 +186,7 @@ export interface Report {
   reporterName: string;
   reason: ReportReason;
   description: string;
-  status: 'submitted' | 'reviewing';
+  status: 'open' | 'reviewing' | 'resolved' | 'dismissed';
   createdAt: string;
 }
 

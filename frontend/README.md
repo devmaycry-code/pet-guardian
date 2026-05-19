@@ -51,6 +51,8 @@ npm run format
 - Seguir e deixar de seguir pets como em uma rede social.
 - Feed com atualizacoes dos pets seguidos.
 - Apadrinhamento com tentativa de persistencia na API e fallback local.
+- Apoio recorrente com checkout Stripe, webhooks e historico de cobrancas.
+- Simulacao local de doacoes com banner explicito e pagamento de teste bloqueado fora de local/dev.
 - Dashboard de administracao para ONG, lar temporario ou tutor responsavel, com persistencia local e tentativa de sincronizacao com a API.
 - Upload real de imagens de pet no dashboard, com envio multipart e otimizacao em segundo plano no backend.
 - Persistencia local via `localStorage` para o estado base do app.
@@ -70,6 +72,8 @@ O seed/local continua existindo, mas agora como contingencia e cache do frontend
 - Feed de pets seguidos: tenta montar as timelines a partir da API e usa o feed local se necessario.
 - Auth demo: os perfis pre-carregados continuam no seed para simular selecao de perfil.
 - Dashboard ONG, lar temporario e tutor responsavel: escreve na API quando possivel e ainda mantem o fallback local para operacao no MVP.
+- Apoio recorrente: usa Stripe Checkout quando configurado e cai para fallback local quando o gateway nao estiver disponivel.
+- Simulacao de doacoes: aparece apenas quando a flag de runtime esta ativa no ambiente local/dev.
 
 ## Perfis Mockados
 
@@ -122,14 +126,18 @@ A especificacao do frontend fica em `docs/`:
 ## Limitacoes Atuais
 
 - O seed ainda e necessario como fallback e cache para alguns fluxos.
-- Nao ha pagamento real.
 - Alguns fluxos administrativos ainda usam fallback local.
+
+## Proximos Passos
+
+O backlog vivo do projeto fica em [../BACKLOG.md](../BACKLOG.md).
 
 ## Resumo De Entregas Recentes
 
 - O frontend passou a usar a API como fonte principal nos fluxos publicos e autenticados.
 - Existe pagina institucional de ONG separada do perfil do pet.
-- O fluxo de apoio recorrente agora permite apoiar pet ou ONG, com pausa, retomada e cancelamento.
+- O fluxo de apoio recorrente agora permite apoiar pet ou ONG, com pausa, retomada, cancelamento, Stripe Checkout e webhooks.
+- Existe modo de simulacao local com doacoes de teste e aviso visual no app.
 - O perfil do pet exibe carteira de vacinacao, linha do tempo, cartinhas e transparencia como blocos separados.
 - O upload de imagem do pet funciona com envio multipart para a API.
 - O runner de testes foi ajustado para executar corretamente neste ambiente Windows.

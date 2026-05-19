@@ -1,4 +1,3 @@
-import { useAuthStore } from '../features/auth/auth-store';
 import { usePetStore } from '../features/pets/pet-store';
 import { mapRemoteNeed, mapRemotePetToPet, mapRemoteTimelinePost } from './api-mappers';
 import { slugify } from '../utils/format';
@@ -49,12 +48,13 @@ const buildPetDraft = (payload: DashboardPetPayload) => ({
   image: 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=900&q=80',
 });
 
-const buildPetRequestBody = (payload: DashboardPetPayload, draft: ReturnType<typeof buildPetDraft>) => {
+const buildPetRequestBody = (
+  payload: DashboardPetPayload,
+  draft: ReturnType<typeof buildPetDraft>,
+) => {
   if (!payload.avatarFile) {
     return {
-      organization_id: Number.isFinite(Number(payload.organizationId))
-        ? Number(payload.organizationId)
-        : undefined,
+      organization_id: Number(payload.organizationId),
       name: payload.name,
       slug: draft.slug,
       species: payload.species,
@@ -89,102 +89,84 @@ const buildPetRequestBody = (payload: DashboardPetPayload, draft: ReturnType<typ
 
 export const dashboardService = {
   async createPet(payload: DashboardPetPayload) {
-    const token = useAuthStore.getState().accessToken;
     const draft = buildPetDraft(payload);
+    const response = await http.post<ApiEnvelope<Parameters<typeof mapRemotePetToPet>[0]>>(
+      '/pets',
+      buildPetRequestBody(payload, draft),
+    );
 
-    if (token) {
-      try {
-        const response = await http.post<ApiEnvelope<Parameters<typeof mapRemotePetToPet>[0]>>(
-          '/pets',
-          buildPetRequestBody(payload, draft),
-        );
-
-        const remotePet = response.data?.result;
-        if (remotePet) {
-          const mappedPet = mapRemotePetToPet(remotePet);
-          usePetStore.getState().mergeRemotePets([mappedPet]);
-          return mappedPet;
-        }
-      } catch {
-        // Keep local creation when the backend rejects the request.
-      }
+    const remotePet = response.data?.result;
+    if (!remotePet) {
+      throw new Error('A API nao retornou o pet criado.');
     }
 
-    return usePetStore.getState().createPet(payload);
+    const mappedPet = mapRemotePetToPet(remotePet);
+    usePetStore.getState().mergeRemotePets([mappedPet]);
+    return mappedPet;
   },
 
   async addNeed(payload: DashboardNeedPayload) {
     const pet = resolvePet(payload.petId);
-    const token = useAuthStore.getState().accessToken;
 
-    if (token && pet) {
-      try {
-        const response = await http.post<ApiEnvelope<Parameters<typeof mapRemoteNeed>[0]>>(
-          `/pets/${resolvePetSlug(pet.id)}/needs`,
-          {
-            title: payload.title,
-            description: payload.description,
-            type: 'care',
-            goal_amount: payload.estimatedAmount,
-            current_amount: 0,
-            urgency_level: 'high',
-            status: 'open',
-            proof_required: true,
-          },
-        );
-
-        const remoteNeed = response.data?.result;
-        if (remoteNeed) {
-          const mappedNeed = {
-            ...mapRemoteNeed(remoteNeed),
-            petId: payload.petId,
-          };
-
-          usePetStore.getState().mergeRemoteNeeds([mappedNeed]);
-          return mappedNeed;
-        }
-      } catch {
-        // Local fallback already applied above.
-      }
+    if (!pet) {
+      throw new Error('Pet nao encontrado para criar necessidade.');
     }
 
-    return usePetStore.getState().addNeed(payload);
+    const response = await http.post<ApiEnvelope<Parameters<typeof mapRemoteNeed>[0]>>(
+      `/pets/${resolvePetSlug(pet.id)}/needs`,
+      {
+        title: payload.title,
+        description: payload.description,
+        type: 'care',
+        goal_amount: payload.estimatedAmount,
+        current_amount: 0,
+        urgency_level: 'HIGH',
+        status: 'OPEN',
+        proof_required: true,
+      },
+    );
+
+    const remoteNeed = response.data?.result;
+    if (!remoteNeed) {
+      throw new Error('A API nao retornou a necessidade criada.');
+    }
+
+    const mappedNeed = {
+      ...mapRemoteNeed(remoteNeed),
+      petId: payload.petId,
+    };
+
+    usePetStore.getState().mergeRemoteNeeds([mappedNeed]);
+    return mappedNeed;
   },
 
   async addTimelinePost(payload: DashboardTimelinePayload) {
     const pet = resolvePet(payload.petId);
-    const token = useAuthStore.getState().accessToken;
 
-    if (token && pet) {
-      try {
-        const response = await http.post<ApiEnvelope<Parameters<typeof mapRemoteTimelinePost>[0]>>(
-          `/pets/${resolvePetSlug(pet.id)}/timeline`,
-          {
-            title: payload.title,
-            content: payload.content,
-            type: 'milestone',
-          },
-        );
-
-        const remoteTimelinePost = response.data?.result;
-        if (remoteTimelinePost) {
-          const mappedTimelinePost = {
-            ...mapRemoteTimelinePost(remoteTimelinePost),
-            petId: payload.petId,
-          };
-
-          usePetStore.getState().mergeRemoteTimelinePosts([mappedTimelinePost]);
-          return mappedTimelinePost;
-        }
-      } catch {
-        // Local fallback already applied above.
-      }
+    if (!pet) {
+      throw new Error('Pet nao encontrado para publicar a timeline.');
     }
 
-    return usePetStore.getState().addTimelinePost(payload);
-  },
+    const response = await http.post<ApiEnvelope<Parameters<typeof mapRemoteTimelinePost>[0]>>(
+      `/pets/${resolvePetSlug(pet.id)}/timeline`,
+      {
+        title: payload.title,
+        content: payload.content,
+        type: 'milestone',
+      },
+    );
 
-  reset() {
-    usePetStore.getState().resetData();
+    const remoteTimelinePost = response.data?.result;
+    if (!remoteTimelinePost) {
+      throw new Error('A API nao retornou a atualizacao publicada.');
+    }
+
+    const mappedTimelinePost = {
+      ...mapRemoteTimelinePost(remoteTimelinePost),
+      petId: payload.petId,
+    };
+
+    usePetStore.getState().mergeRemoteTimelinePosts([mappedTimelinePost]);
+    return mappedTimelinePost;
   },
 };

@@ -6,15 +6,23 @@ import { router } from './router';
 
 export function App() {
   const [ready, setReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
     void (async () => {
-      await publicCatalogService.sync();
-      await authService.restoreSession();
-      if (!cancelled) {
-        setReady(true);
+      try {
+        await publicCatalogService.sync();
+        await authService.restoreSession();
+        if (!cancelled) {
+          setReady(true);
+        }
+      } catch {
+        if (!cancelled) {
+          setError('Nao foi possivel carregar o catalogo publico.');
+          setReady(true);
+        }
       }
     })();
 
@@ -22,6 +30,14 @@ export function App() {
       cancelled = true;
     };
   }, []);
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-brand-cream px-4 text-center text-brand-muted">
+        {error}
+      </div>
+    );
+  }
 
   if (!ready) {
     return (
